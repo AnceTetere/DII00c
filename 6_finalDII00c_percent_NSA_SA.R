@@ -3,9 +3,8 @@
 c <- c("NSA", "SA")
 
 for (i in 1:length(c)) {
-  #1. Ielādē gatavo indeksu tabulu  
-  setwd(paste0(path, "\\izstrade\\intermediate_tables"))
-  load(paste0("gatavs_", c[i], "00Q1_", substr(year, 3, 4), "Q", Q, ".RData"))
+  #1. Ielādē gatavo tabulu
+  load(file.path(intermediate_path, paste0("gatavs_", c[i], "00Q1_", substr(year, 3, 4), "Q", Q, ".RData")))
   assign("g", get(paste0("gatavs_", c[i])))
   rm(list = paste0("gatavs_", c[i]))
   
@@ -21,7 +20,7 @@ for (i in 1:length(c)) {
     g_split <- split(g, g$INDICATOR)
     names(g_split) <- paste0("g_", names(g_split))
     g_ind <-
-      names(g_split) # g_ind vor gatavie indikatori (kaut kā tā)
+      names(g_split) 
     list2env(g_split, envir = .GlobalEnv)
     rm(g, g_split)
     
@@ -60,7 +59,7 @@ for (i in 1:length(c)) {
     rm(s, g_LC_OTH, g_LC_TOTAL, g_LC_WAG_TOT)
     
     save(list = fileName,
-         file = paste0(fileName, "00Q1_", substr(year, 3, 4), "Q", Q, ".RData"))
+         file = file.path(intermediate_path, paste0(fileName, "00Q1_", substr(year, 3, 4), "Q", Q, ".RData")))
     rm(burti, g_ind, fileName)
   } else {
     print("Datu koriģēšanas atzīmes nesakrīt.")
@@ -73,16 +72,15 @@ rm(c, i)
 f <- rbind(gataviProc_NSA, gataviProc_SA)
 rm(gataviProc_NSA, gataviProc_SA)
 
-setwd(paste0(path, "\\izstrade\\intermediate_tables\\starting_templates"))
-rindas_order <- readRDS("Rindas_kopa.RDS")
+starting_path <- file.path(path, "izstrade", "intermediate_tables", "starting_templates")
+rindas_order <- readRDS(file.path(starting_path, "Rindas_kopa.RDS"))
 
 if (nrow(f) == length(rindas_order)) {
   f <- f[order(match(f$rindas, rindas_order)),]
   rownames(f) <- NULL
   assign("finalDII00c_unformatted", f)
   
-  setwd(paste0(path, "\\izstrade\\intermediate_tables"))
-  save(finalDII00c_unformatted, file = "finalDII00c_unformatted.RData")
+  save(finalDII00c_unformatted, file = file.path(intermediate_path, "finalDII00c_unformatted.RData"))
   rm(f, finalDII00c_unformatted, rindas_order)
 } else {
   stop("Rindu skaits nesakrīt.")
