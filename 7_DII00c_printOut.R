@@ -1,8 +1,7 @@
 # ---------------- NODEVUMA FORMĀTS UN PRINT-OUT
 
 #1. Ielādē nenoformēto, galējo, pilno DII00c tabulu 
-setwd(paste0(path, "\\izstrade\\intermediate_tables"))
-load("finalDII00c_unformatted.RData")
+load(file.path(intermediate_path, "finalDII00c_unformatted.RData"))
 x <- finalDII00c_unformatted
 rm(finalDII00c_unformatted)
 
@@ -17,11 +16,10 @@ x$rindas <- NULL
 DII00c_formatted <- x 
 rm(x)
 
-setwd(paste0(path, "\\izstrade\\intermediate_tables"))
-save(DII00c_formatted, file = "final_DII00c_formatted.RData")
+save(DII00c_formatted, file = file.path(intermediate_path, "final_DII00c_formatted.RData"))
 DII00c <- DII00c_formatted
 rm(DII00c_formatted)
 
-setwd(paste0(path, "\\izstrade\\printOuts"))
-write.table(DII00c, "DII00c_final.csv", sep = ";", col.names = TRUE, row.names = FALSE, qmethod = "double")
+print_path <- file.path(path, "izstrade", "printOuts")
+write.table(DII00c, file.path(print_path, "DII00c_final.csv"), sep = ";", col.names = TRUE, row.names = FALSE, qmethod = "double")
 rm(DII00c, path, Q, year)
