@@ -1,25 +1,26 @@
 #----------------Izstrādā NSA un SA
-
+#path <- file.path(base_path, paste0(year, "Q", Q))
 c <- c("NSA", "SA")
 
 for (i in 1:length(c)) {
 
 #1. Ielādē šablonu
-load(paste0(path, "izstrade\\intermediate_tables\\", c[i], ".RData"))
+template_path <- file.path(path, "izstrade", "intermediate_tables", paste0(c[i], ".RData"))
+load(template_path)
 assign("t", get(c[i]))
 rm(list = c[i])
 t$forMerge <- paste0(t$TIME, "_", t$NACE)
 
 #2. Ielādē ceturkšņa indeksus
-
+data_path <- file.path(paste0("F:/.../ICL/forEurostat/", year, "ICL", year, "_Q", Q, "/workflow/2_Fails_Eurostatam/sagatavošana/intermediate_tables"))
 if(c[i] == "NSA") {
   load(paste0("F:\\...\\ICL\\forEurostat\\", year, "\\ICL",
-            year, "_Q", Q, "\\workflow\\3_Fails_Eurostatam\\sagatavošana\\intermediate_tables\\gatavs_nsaICL_00Q1_",
+            year, "_Q", Q, "\\workflow\\2_Fails_Eurostatam\\sagatavošana\\intermediate_tables\\gatavs_nsaICL_00Q1_",
             substr(year, 3, 4), "Q", Q, ".RData"))
   } else {
     load(paste0("F:\\...\\ICL\\forEurostat\\", year, "\\ICL",
               year, "_Q", Q, 
-              "\\workflow\\3_Fails_Eurostatam\\sagatavošana\\intermediate_tables\\gatavs_saICL_00Q1_", 
+              "\\workflow\\2_Fails_Eurostatam\\sagatavošana\\intermediate_tables\\gatavs_saICL_00Q1_", 
               substr(year, 3, 4), "Q", Q, ".RData"))}
 
 d <- get(paste0(tolower(c[i]), "ICL_00Q1_", substr(year, 3, 4), "Q", Q))
@@ -27,15 +28,15 @@ rm(list = paste0(tolower(c[i]), "ICL_00Q1_", substr(year, 3, 4), "Q", Q))
 
 
 #3. No ICL datu tabulas izņemt NACE agregātus B-N un O-S
-d <- d[!d$ACTIVITY %in% c("BTN", "OTS"), ] 
+d <- d[!d$ACTIVITY %in% c("BTN", "OTS"), ] #7220
 d$ACTIVITY[d$ACTIVITY == "BTS"] <- "B-S"
 
 # Savienošanas aile
 d$forMerge <- paste0(substr(d$TIME_PERIOD, 1, 4), 
                           substr(d$TIME_PERIOD, 6, 7), "_", d$ACTIVITY)
 
-# No nsaICL izņem indikatoru “TXB” un izdala ailes
-d <- d[d$INDICATOR != "ICL_TXB", ]
+# No nsaICL izņem indikatoru “TXB un izdala ailes
+d <- d[d$INDICATOR != "ICL_TXB", ] 
 
 testV <- switch(
   c[i],
@@ -46,7 +47,7 @@ testV <- switch(
 if(sum(d$SEASONAL_ADJUST == testV) == nrow(d) & sum(t$forMerge %in% d$forMerge) == nrow(d)) {
   d <- d[ , c("INDICATOR", "OBS_VALUE", "forMerge")]
 } else {
-  print("Te visi dati nav sezonāli izkoriģēti.")
+  print("Te visi atzīmētie dati ir sezonāli izkoriģēti.")
 }
 rm(testV)
 
@@ -100,7 +101,7 @@ y <- rbind(gatavs_1, gatavs_2, gatavs_3)
 rm(gatavs_1, gatavs_2, gatavs_3)
 
 assign(paste0("gatavs_", c[i]), y)
-setwd(paste0(path, "\\izstrade\\intermediate_tables"))
+intermediate_path <- file.path(path, "izstrade", "intermediate_tables")
 save(list = paste0("gatavs_", c[i]), file = paste0("gatavs_", c[i], "00Q1_", substr(year, 3, 4), "Q", Q, ".RData"))
 
 rm(list = paste0("gatavs_", c[i]), y)
